@@ -39,20 +39,36 @@
 # systems, on mt network" thing. Hopefully things improve and are generalized.
 # Patches very welcome.
 
-#Mirror for portage snapshot and stage3 tarball
-MIRROR=http://lug.mtu.edu/gentoo/
+# Mirror for Portage snapshot and Stage3 tarball
+MIRROR=https://mirror.math.princeton.edu/pub/gentoo/
 
-#stage 3 relative path
+# Stage3 relative path
 STAGE_PATH=releases/amd64/autobuilds/current-stage3-amd64/
 
-#portage snapshot relative path
+# Portage snapshot relative path
 PORTAGE_PATH=snapshots/
 
-#Stage3 tarball
-STAGE_BALL=stage3-amd64-20180715T214502Z.tar.xz
+# Temporary file to store the latest stage3 tarball name
+TEMP_STAGE_BALL=$(mktemp)
 
-#Portage snapshot tarball
+# Fetch the latest stage3 tarball filename from the mirror
+wget -qO- ${MIRROR}${STAGE_PATH} | grep -oP 'href="\Kstage3-amd64-[^"]+\.tar\.xz' | sort -V | tail -n1 > ${TEMP_STAGE_BALL}
+
+# Read the latest tarball filename
+STAGE_BALL=$(cat ${TEMP_STAGE_BALL})
+rm ${TEMP_STAGE_BALL}
+
+# Latest Portage snapshot tarball (this typically remains constant as 'portage-latest.tar.xz')
 PORTAGE_SNAPSHOT=portage-latest.tar.xz
+
+# Download the Stage3 tarball
+echo "Downloading Stage3 tarball: ${STAGE_BALL}"
+wget ${MIRROR}${STAGE_PATH}${STAGE_BALL} -O stage3-amd64.tar.xz
+
+# Download the Portage snapshot
+echo "Downloading Portage snapshot"
+wget ${MIRROR}${PORTAGE_PATH}${PORTAGE_SNAPSHOT} -O portage-latest.tar.xz
+
 
 #Root filesystem device
 ROOTDEV=/dev/sda4
